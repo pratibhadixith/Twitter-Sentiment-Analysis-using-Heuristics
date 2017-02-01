@@ -1,0 +1,164 @@
+Twitter Sentiment Analysis using
+Heuristics
+
+Twitter API
+
+* To access the current Twitter stream, you need to send a GET request to
+https://stream.twitter.com/1.1/statuses/sample.json. If you want to learn more about this API request, go to
+https://dev.twitter.com/docs/api/1/get/statuses/sample
+
+* Go to the directory containing fetch_tweets.py , run the following command and make sure you see
+data flowing and that no errors occur. The program will fetch a small random sample of all public
+statuses and print out each tweet to the console in a json format . Stop the program with CtrlC
+once you are satisfied.
+$ python3 fetch_tweets.py ‐c fetch_samples
+
+* You can pipe the output to a file, wait a few minutes, then terminate the program to generate a
+sample. Use the following command:
+$ python3 fetch_tweets.py ‐c fetch_samples > streaming_output_full.txt
+Let this script run for about 5 minutes. Keep the file streaming_output_full.txt throughout the
+assignment. You will be using it in later problems.
+
+Search API
+
+* Similar to the Streaming API, to get the tweets related to a search term, you can send a GET
+request to https://api.twitter.com/1.1/search/tweets.json . To learn more about this, visit
+https://dev.twitter.com/docs/api/1.1/get/search/tweets
+Run the following to get the tweets related to a term of your choice
+$ python3 fetch_tweets.py ‐c fetch_by_terms ‐term "[your_chosen_term]" >
+search_output.txt
+
+
+User API
+
+* You should be familiar with the Twitter API by now. For this part, you will be
+getting the 100 most recent tweets from each Breaking Bad actors. We've provided the list of their
+user names (i.e. BryanCranston ) in user_names.txt . Your job is to implement the function
+fetch_by_user_names() in fetch_tweets.py .
+To get users' tweets by user name, consult
+https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline . See the stencil code for
+fetch_by_terms and fetch_samples for how to send a request, setup the parameters, and parse
+the response. You should be able to get the results by running
+$ python3 fetch_tweets.py ‐c fetch_by_user_names ‐file user_names.txt >
+breaking_bad_tweets.csv
+
+Hint
+● Even when you set the parameter count to 100, the list of tweets returned might contain
+fewer than 100 tweets because some of them are deleted. Don't worry about this
+● To print the text of each tweet, try print (tweet['text'].encode('utf‐8'))
+
+Output - 
+user_name,tweet
+BryanCranston,"My last tweet was satirical. But Senator McConnell, citizens DO have a
+voice in selecting Justices. It's called a presidential election."
+...
+
+* Compute term frequency
+Write a Python script, frequency.py , to compute the term frequency histogram of tweets in
+streaming_output_full.txt
+The frequency of a term can be calculate with the following formula:
+[# of occurrences of the term in all tweets]/[# of occurrences of all terms in all
+tweets]
+frequency.py should take a file of tweets as an input and be usable in the following way:
+$ python3 frequency.py <stopword_file> <tweet_file> > term_freq.txt
+Assume the tweet file contains data formatted the same way as the livestream data in
+streaming_output_full.txt , and the stop word file contains a list of stop words (for example,
+data/stopwords.txt ). Your program should operate on the text field of tweets, ignoring terms that
+appear in stopword_file .
+
+Output-
+[term] [frequency]
+For example, if you have the pair (bar, 0.1245) it should appear in the output as (a word and a real
+number separated by a space):
+bar 0.1245
+You should convert all tweets to lower case, and sort your output so that the most frequent terms
+appear at the top.
+Depending on your method of parsing, you may end up with frequencies for hashtags, links,
+phrases, etc. Some noise is acceptable for the sake of keeping parsing simple. You are free to
+experiment with strategies for tokenizing, but you will get full credit just by using the default split()
+function (splitting by whitespace characters).
+
+Hint
+● Not every tweet dictionary will have a text key real
+data is dirty. Be prepared to debug, and
+feel free to throw out tweets that your code can't handle to get something working. For
+example, nonEnglish
+tweets, or deleted tweets.
+
+* Determine the sentiment of each tweet
+For this part, you will compute the sentiment of each tweet based on the sentiment scores of the
+terms in the tweet. The sentiment of a tweet is equivalent to the sum of the sentiment scores for
+each term in the tweet.
+Write tweet_sentiment.py, which can be executed using the following
+command:
+$ python3 tweet_sentiment.py <sentiment_file> <tweet_file> > tweet_sentiment.txt
+The file data/AFINN‐111.txt contains a list of precomputed
+sentiment scores. Each line in the file
+contains a word or phrase followed by a sentiment score. Each word or phrase found in a tweet, but
+not in AFINN111.txt should be given a sentiment score of 0. See the file AFINNREADME.txt formore information.
+
+Assume the tweet file contains data formatted the same way as the livestream data.
+Your script should output (into tweet_sentiment_[your NetID].txt ) the pairs of the sentiment and
+the tweet of the top 10 highest sentiment tweets (in descending order) then the bottom 10 lowest
+sentiment tweets (in descending order) in the file streaming_output_full.txt :
+[top tweet 1 score]: [top tweet 1 text]
+[top tweet 2 score]: [top tweet 2 text]
+...
+[top tweet 10 score]: [top tweet 10 text]
+[bottom tweet 10 score]: [bottom tweet 10 text]
+...
+[bottom tweet 1 score]: [bottom tweet 1 text]
+NOTE: The 20 tweets printed out are sorted in descending order on sentiment score. The first
+sentiment corresponds to the happiest tweet in the input file, the last sentiment corresponds to the
+unhappiest tweet in the input file.
+
+Output-
+1. tweet_sentiment.py
+2. Report top 10 and bottom 10 tweets along with their sentiment score in reportb_[your
+NetID].txt
+
+* Happiest Breaking Bad actor
+For this part, find out who is the happiest
+Breaking Bad actor.
+Write a Python script, happiest_actor.py , that returns the list of user name and average sentiment
+score pairs sorted in decreasing order on the average sentiment score.
+happiest_actor.py should take in a file of tweets in the same format as breaking_bad_tweets.csv ,
+a sentiment file ( AFINN111.
+txt for example) as input and be usable in the following way:
+$ python3 happiest_actor.py <sentiment_file> <csv_file> > happiest_actor.txt
+
+Similar to the previous part, your script should output (into happiest_actor_[your NetID].txt ) the
+sentiment of all Breaking Bad actors sorted in decreasing order on the average sentiment score:
+[actor 1 score]: [actor 1 username]
+[actor 2 score]: [actor 2 username]
+...
+
+* Happiest State
+Write a Python script, happiest_state.py , that finds the average sentiment score of each U.S. state
+in the file streaming_output_full.txt .
+happiest_state.py should take a file of tweets as an input and be usable in the following way:
+$ python3 happiest_state.py <sentiment_file> <tweet_file> > happiest_state.txt
+Similar to the previous parts, your script should output (into happiest_state_[your NetID].txt ) the
+sentiment of each U.S. state sorted in decreasing order on the average sentiment score:
+[state 1 score]: [state 1 abbreviation]
+[state 2 score]: [state 2 abbreviation]
+...
+Assume the tweet file contains data formatted the same way as the streaming_output_full.txt
+There are three different objects within the tweet that you can use to determine it's origin.
+1. The coordinates object
+2. The place object
+3. The user object
+
+Hint
+● Not every tweet dictionary will have a text key real
+data is dirty. Be prepared to debug, and
+feel free to throw out tweets that your code can't handle to get something working. For
+example, nonEnglish
+tweets, or deleted tweets.
+● Your script will not have access to the Internet, so you cannot rely on third party services to
+resolve geocoded locations.
+
+Output-
+1. happiest_state_[your NetID].py
+2. Report 5 happiest states and 5 unhappiest states along with their sentiment score in
+reportb_[your NetID].txt
